@@ -1,0 +1,90 @@
+version: '3'
+services:
+  web:
+    build: ./myapp
+    volumes:
+      - ./myapp:/app
+    ports:
+      - "3000:3000"
+    links:
+      - redis
+  app:
+    build: ./call_service
+    volumes:
+      - ./call_service:/web
+    ports:
+      - "4000:4000"
+    links:
+      - redis
+      - sidekiq
+
+  sidekiq:
+    build: ./call_service
+    volumes:
+      - ./call_service:/web
+    command: bundle exec sidekiq
+    links:
+      - redis
+
+  sidekiq_web:
+    build: ./myapp
+    volumes:
+      - ./myapp:/app
+    command: bundle exec sidekiq
+    links:
+      - redis
+
+  cluster1:
+    build: ./chatapp
+    ports:
+      - "6001:3000"
+    volumes:
+      - ./chatapp:/src/app
+    environment:
+      - PORT=3000
+      - NODE_ENV=${NODE_ENV}
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=''
+      - DB_USER=${CHAT_DB_USER}
+      - DB_PASSWORD=${CHAT_DB_PASSWORD}
+      - DB_HOST=${CHAT_DB_HOST}
+      - DB_PORT=${CHAT_DB_PORT}
+      - DB_NAME=${CHAT_DB_NAME}
+      - DB_DIALECT=${CHAT_DB_DIALECT}
+      - ECHO_SENT_MESSAGE=${ECHO_SENT_MESSAGE}
+      - SERVER_NAME='ChatServer_server1'
+    command: forever server.js
+    links:
+      - redis
+  cluster2:
+    build: ./chatapp
+    ports:
+      - "6002:3000"
+    volumes:
+      - ./chatapp:/src/app
+    environment:
+      - PORT=3000
+      - NODE_ENV=${NODE_ENV}
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=''
+      - DB_USER=${CHAT_DB_USER}
+      - DB_PASSWORD=${CHAT_DB_PASSWORD}
+      - DB_HOST=${CHAT_DB_HOST}
+      - DB_PORT=${CHAT_DB_PORT}
+      - DB_NAME=${CHAT_DB_NAME}
+      - DB_DIALECT=${CHAT_DB_DIALECT}
+      - ECHO_SENT_MESSAGE=${ECHO_SENT_MESSAGE}
+      - SERVER_NAME='ChatServer_server2'
+    command: forever server.js
+    links:
+      - redis
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    environment:
+      - PORT=6379
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis

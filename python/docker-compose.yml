@@ -1,0 +1,31 @@
+# version: '3'
+# services:
+#   web:
+#     build: .
+#     command: gunicorn -b 0.0.0.0:8000 todosapp.wsgi:application
+#     depends_on:
+#       - postgres
+#     volumes:
+#       - .:/home/mnagdevani/Desktop/Desktop/devops/test
+#     ports:
+#       - "8000:8000"
+#     environment:
+#       DATABASE_URL: postgres://todoapp@postgres/todos
+#   postgres:
+#     image: postgres:9.6.2-alpine
+#     environment:
+#       POSTGRES_USER: todoapp
+#       POSTGRES_DB: todos
+version: '3'
+services:
+  db:
+    image: postgres:9.6
+    ports:
+      - "5432:5433"
+  web:
+    build: .
+    command: python3 app.py runserver 0.0.0.0:8000
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db

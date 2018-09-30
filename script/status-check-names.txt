@@ -1,0 +1,4 @@
+ei/10-build-and-unit-test
+ei/20-nexus-publish
+ei/30-app-deployment
+ei/40-component-test
