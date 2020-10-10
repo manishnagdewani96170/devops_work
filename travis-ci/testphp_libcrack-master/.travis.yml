@@ -1,0 +1,42 @@
+language: php
+dist: precise
+
+php:
+  - 5.3
+  - 7.2
+
+services:
+    - elasticsearch
+    - memcached  
+
+cache:
+    directories:
+        - node_modules
+        - /home/travis/.nvm/
+
+addons:
+    hosts:
+        - mysql.local
+        - dce-memcached
+        - darwin-history-mysql
+
+env:
+  - DWIN_BRAND=awin
+
+install:
+    # Display current supported locales
+    - locale -a
+    # Install dependencies
+    - composer self-update 1.7.2
+    - composer global require hirak/prestissimo
+    - composer install --prefer-dist --no-progress
+    - nvm install 7.10.1
+    - npm install
+    - #bash vendor/bin/setup-travis-memcached.sh
+    - #bash vendor/bin/setup-travis-apc.sh
+    - echo '' | pecl install -f amqp-1.8.0
+    - echo 'date.timezone = "Europe/London"' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+    - php -m
+    - sudo apt-get install libcrack2
+    - sudo mkdir /var/log/aw && sudo touch /var/log/aw/darwin.log && sudo chmod 777 /var/log/aw/darwin.log
+    - sudo mkdir /srv/log && sudo mkdir /srv/log/darwin-docker && sudo touch /srv/log/darwin-docker/signups-errors.log && sudo chmod 777 /srv/log/darwin-docker/signups-errors.log

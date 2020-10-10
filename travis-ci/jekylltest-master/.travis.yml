@@ -1,0 +1,9 @@
+language: ruby
+rvm: 2.4.0
+before_script:
+ - cd _site
+install:
+  - git clone https://github.com/edap/edap.github.com.git --branch master _site
+  - gem install jekyll
+script:
+ - "bundle exec jekyll build"
